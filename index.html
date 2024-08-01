@@ -20,6 +20,24 @@
         #chartContainer {
             width: 100%;
             max-width: 1200px;
+            height: 600px;
+        }
+        #legendContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .color-box {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
         }
     </style>
 </head>
@@ -28,6 +46,7 @@
     <div id="chartContainer">
         <canvas id="investmentChart"></canvas>
     </div>
+    <div id="legendContainer"></div>
 
     <script>
         const ctx = document.getElementById('investmentChart').getContext('2d');
@@ -58,7 +77,8 @@
             data: data[municipality],
             backgroundColor: `hsla(${index * 20}, 70%, 60%, 0.7)`,
             borderColor: `hsla(${index * 20}, 70%, 60%, 1)`,
-            borderWidth: 1
+            borderWidth: 1,
+            hidden: true
         }));
 
         const chart = new Chart(ctx, {
@@ -101,31 +121,36 @@
                         }
                     },
                     legend: {
-                        position: 'right',
-                        onClick: function(e, legendItem, legend) {
-                            const index = legendItem.datasetIndex;
-                            const ci = legend.chart;
-                            const alreadyHidden = (ci.getDatasetMeta(index).hidden === null) ? false : ci.getDatasetMeta(index).hidden;
-
-                            ci.data.datasets.forEach(function(e, i) {
-                                const meta = ci.getDatasetMeta(i);
-
-                                if (i !== index) {
-                                    if (!alreadyHidden) {
-                                        meta.hidden = meta.hidden === null ? !meta.hidden : null;
-                                    } else if (meta.hidden === null) {
-                                        meta.hidden = true;
-                                    }
-                                } else if (i === index) {
-                                    meta.hidden = null;
-                                }
-                            });
-
-                            ci.update();
-                        }
+                        display: false
                     }
                 }
             }
+        });
+
+        const legendContainer = document.getElementById('legendContainer');
+
+        datasets.forEach((dataset, index) => {
+            const legendItem = document.createElement('div');
+            legendItem.classList.add('legend-item');
+
+            const colorBox = document.createElement('div');
+            colorBox.classList.add('color-box');
+            colorBox.style.backgroundColor = dataset.backgroundColor;
+
+            const label = document.createElement('span');
+            label.textContent = dataset.label;
+
+            legendItem.appendChild(colorBox);
+            legendItem.appendChild(label);
+
+            legendItem.addEventListener('click', () => {
+                const ci = chart;
+                const meta = ci.getDatasetMeta(index);
+                meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+                ci.update();
+            });
+
+            legendContainer.appendChild(legendItem);
         });
     </script>
 </body>
