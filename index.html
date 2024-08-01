@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráfico de Investimentos por Município</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            text-align: center;
+        }
+        #chartContainer {
+            width: 100%;
+            max-width: 1200px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Investimentos por Município (2013-2047)</h1>
+    <div id="chartContainer">
+        <canvas id="investmentChart"></canvas>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('investmentChart').getContext('2d');
+        
+        const data = {
+            'Abreu e Lima': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,7272691.23,7272691.23,7272691.23,31736517.69,24463826.46,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            'Araçoiaba': [0,0,0,0,0,0,0,0,0,4532410.23,4532410.23,4532410.23,0,0,0,0,0,6798615.35,6798615.35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            'Cabo de Santo Agostinho': [0,0,0,0,1063742.04,1063742.04,5285665.1,5285665.1,5285665.1,5968212.08,5968212.08,5968212.08,1477348.74,7138735.94,26529686,54459589.99,52982241.25,33591291.19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            'Camaragibe': [0,497517.67,497517.67,497517.67,497517.67,497517.67,0,0,0,0,0,0,0,13413976.59,13413976.59,13413976.59,27020271.06,27020271.06,27020271.06,0,0,0,2333997.74,2333997.74,0,0,0,0,0,0,0,0,0,0,0],
+            'Goiana': [0,0,0,0,0,21034791.71,21034791.71,17740283.33,17740283.33,0,0,0,0,0,0,0,16507658.09,16507658.09,16507658.09,7830835.58,7830835.58,7659110.09,16698840.18,9039730.09,0,0,0,0,0,0,0,0,0,0,0],
+            'Igarassu': [0,0,0,0,0,0,0,0,0,0,0,0,0,1609738.68,17850302.96,16240564.27,16240564.27,16240564.27,0,16073246.58,16073246.58,16073246.58,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            'Ipojuca': [0,0,0,0,0,0,0,0,0,0,0,0,0,2155921.95,2155921.95,0,0,0,0,0,0,6750032.99,6750032.99,6750032.99,0,0,0,0,0,0,0,0,0,0,0],
+            'Ilha de Itamaracá': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,25833760.26,25833760.26,25833760.26,25833760.26,5641476.35,5641476.35,0,12842827.11,12842827.11,0,0,0,0,0,0,0,0,0,0,0],
+            'Itapissuma': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,16597432.23,17333257.76,735825.53,735825.53,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            'Jaboatão dos Guararapes': [0,0,0,0,31600941.84,31600941.84,10138326.17,10138326.17,10138326.17,30414978.51,30414978.51,30730298.13,43888094.86,43888094.86,54977382.37,82976283.53,39088188.68,55654980.06,49702017.66,35528385.57,35528385.57,29445706.04,29445706.04,0,0,0,0,0,0,0,0,0,0,0,0],
+            'Moreno': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8173053.57,8173053.57,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            'Olinda': [0,0,0,0,0,0,0,0,0,0,0,0,0,29578513.08,29668140.25,27509111.94,8352191.4,106432.27,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            'Paulista': [0,0,0,0,0,0,0,0,0,0,0,0,0,1645778.31,23141817.3,21872904.44,25526546.3,26429938.22,903391.92,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            'Recife': [0,0,0,0,5238156.15,5238156.15,3927338.54,619192.77,619192.77,1857578.31,1857578.31,20057873.9,2680441.59,52511164.66,138053191.76,169668091.58,143427473.87,84236203.92,82015951.29,38019136.61,41964517.01,14927627.88,10982247.48,0,0,0,0,0,0,0,0,0,0,0,0],
+            'São Lourenço da Mata': [0,4393723.74,4393723.74,4393723.74,4393723.74,4393723.74,0,0,0,0,0,0,0,183515.49,183515.49,183515.49,369662.07,369662.07,369662.07,0,10990239.2,10990239.2,20612215.14,20612215.14,0,0,0,0,0,0,0,0,0,0,0]
+        };
+
+        const years = Array.from({length: 35}, (_, i) => 2013 + i);
+        const municipalities = Object.keys(data);
+
+        const datasets = municipalities.map((municipality, index) => ({
+            label: municipality,
+            data: data[municipality],
+            backgroundColor: `hsla(${index * 20}, 70%, 60%, 0.7)`,
+            borderColor: `hsla(${index * 20}, 70%, 60%, 1)`,
+            borderWidth: 1
+        }));
+
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: years,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                        title: {
+                            display: true,
+                            text: 'Ano'
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        title: {
+                            display: true,
+                            text: 'Investimento (R$)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw;
+                                return `${context.dataset.label}: ${value.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}`;
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'right',
+                        onClick: function(e, legendItem, legend) {
+                            const index = legendItem.datasetIndex;
+                            const ci = legend.chart;
+                            const alreadyHidden = (ci.getDatasetMeta(index).hidden === null) ? false : ci.getDatasetMeta(index).hidden;
+
+                            ci.data.datasets.forEach(function(e, i) {
+                                const meta = ci.getDatasetMeta(i);
+
+                                if (i !== index) {
+                                    if (!alreadyHidden) {
+                                        meta.hidden = meta.hidden === null ? !meta.hidden : null;
+                                    } else if (meta.hidden === null) {
+                                        meta.hidden = true;
+                                    }
+                                } else if (i === index) {
+                                    meta.hidden = null;
+                                }
+                            });
+
+                            ci.update();
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
